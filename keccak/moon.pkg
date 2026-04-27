@@ -1,0 +1,4 @@
+import {
+  "skmtkytr/ethbit/hex" @hex,
+  "moonbitlang/core/bench" @bench,
+} for "test"
