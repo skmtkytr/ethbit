@@ -1,9 +1,12 @@
 import {
+  "moonbitlang/core/bigint" @bigint,
   "skmtkytr/ethbit/bytesx" @bytesx,
   "skmtkytr/ethbit/keccak" @keccak,
   "skmtkytr/ethbit/rlp" @rlp,
+  "skmtkytr/ethbit/secp256k1" @secp256k1,
 }
 
 import {
+  "skmtkytr/ethbit/address" @address,
   "skmtkytr/ethbit/hex" @hex,
 } for "test"
