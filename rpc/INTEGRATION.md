@@ -149,9 +149,40 @@ endpoint goes away or you want to validate against a different chain:
 The fixtures are pinned values, so changes in chain state do not invalidate
 the tests.
 
+## JS-target fetch transport
+
+A built-in fetch wrapper is available on the `js` backend only:
+
+```moonbit
+@rpc.fetch_post(url, body, on_ok, on_err)        // raw POST
+@rpc.fetch_request(url, request, on_ok, on_err)  // encode + POST + decode
+```
+
+Both are callback-based: the MoonBit caller returns immediately and the
+callbacks fire when the underlying Promise settles. Requires a host with
+a `fetch` global (browser native, Node 18+, Bun, Deno).
+
+Working example: [`examples/rpc-fetch`](../examples/rpc-fetch/main.mbt).
+Run it with:
+
+```fish
+moon run --target js examples/rpc-fetch
+```
+
+Output (live against Sepolia):
+```
+eth_chainId           = 11155111
+eth_blockNumber       = 10750431
+balance(vitalik) wei  = 57227314527865035068
+```
+
+For native or wasm-gc targets the transport is not implemented; you must
+provide your own (libcurl FFI on native, host imports on wasm-gc — see
+[`TODO.md`](../TODO.md)).
+
 ## What's NOT here
 
-- A built-in HTTP / WebSocket client. Per-target work is on
+- HTTP / WebSocket clients on native and wasm-gc targets. Tracked in
   [`TODO.md`](../TODO.md).
 - Long-poll / batching helpers. JSON-RPC 2.0 batch (an array of requests)
   is not yet supported by `encode_request` / `decode_response`.

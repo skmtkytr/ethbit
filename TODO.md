@@ -16,7 +16,7 @@
 - viem の `signTypedData` / `verifyTypedData` 出力との byte-equivalence テスト（最終ハッシュは spec 例で一致確認済み、追加ベクトルが欲しい）
 
 ### rpc
-- HTTP transport（target 別実装が必要：JS は fetch、native はソケット直叩きまたは外部 lib、wasm-gc は host 関数）
+- HTTP transport：JS は `fetch_post` / `fetch_request` 実装済（`examples/rpc-fetch` で動作確認）。native は libcurl FFI、wasm-gc は host import まだ
 - WebSocket transport：フレーム / handshake のプロトコル層は `ws` パッケージに実装済。残るは TCP + TLS の per-target 接続層
 - erigon 固有 namespace（`erigon_getHeaderByNumber`, `erigon_blockNumber`, `erigon_forks`, `erigon_getBlockByTimestamp`, etc.）
 - engine_API（コンセンサスクライアント連携。通常 wallet 不要だが完全性のため）

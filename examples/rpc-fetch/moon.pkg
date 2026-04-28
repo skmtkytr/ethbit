@@ -1,0 +1,16 @@
+// Suppress 0035 (reserved_keyword) for the JSON-RPC `method` field.
+// Suppress 0029 (unused_package) — @rpc is unused on non-JS targets where
+// only main_stub.mbt is built.
+warnings = "-35-29"
+
+import {
+  "skmtkytr/ethbit/rpc" @rpc,
+}
+
+options(
+  "is-main": true,
+  targets: {
+    "main.mbt": [ "js" ],
+    "main_stub.mbt": [ "wasm", "wasm-gc", "native", "llvm" ],
+  },
+)

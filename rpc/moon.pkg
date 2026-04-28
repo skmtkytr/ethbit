@@ -8,3 +8,9 @@ import {
   "skmtkytr/ethbit/hex" @hex,
   "skmtkytr/ethbit/tx" @tx,
 }
+
+options(
+  targets: {
+    "fetch_js.mbt": [ "js" ],
+  },
+)
