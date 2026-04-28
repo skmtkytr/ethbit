@@ -1,0 +1,377 @@
+// Reference values generated with viem (npm), the de-facto Ethereum
+// JS toolkit. See abi_reference_vectors.md (not in repo) for the script.
+
+fn h(s : String) -> Bytes {
+  match @hex.decode(s) {
+    Ok(b) => b
+    Err(_) => abort("invalid hex literal in test")
+  }
+}
+
+fn u(n : UInt64) -> @abi.AbiValue {
+  @abi.uint256_from_u64(n)
+}
+
+fn addr(s : String) -> @abi.AbiValue {
+  @abi.address(h(s))
+}
+
+// ---- selector ----
+
+test "selector: transfer(address,uint256) = 0xa9059cbb" {
+  assert_eq(@abi.selector("transfer(address,uint256)"), b"\xa9\x05\x9c\xbb")
+}
+
+test "selector: balanceOf(address) = 0x70a08231" {
+  assert_eq(@abi.selector("balanceOf(address)"), b"\x70\xa0\x82\x31")
+}
+
+test "selector: approve(address,uint256) = 0x095ea7b3" {
+  assert_eq(@abi.selector("approve(address,uint256)"), b"\x09\x5e\xa7\xb3")
+}
+
+// ---- encode static ----
+
+test "encode: uint256(0)" {
+  assert_eq(
+    @abi.encode([u(0UL)]),
+    h("0x0000000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: uint256(1)" {
+  assert_eq(
+    @abi.encode([u(1UL)]),
+    h("0x0000000000000000000000000000000000000000000000000000000000000001"),
+  )
+}
+
+test "encode: uint256(0xff)" {
+  assert_eq(
+    @abi.encode([u(0xffUL)]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000ff"),
+  )
+}
+
+test "encode: uint256(max) = 0xff...ff" {
+  let max = b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
+  assert_eq(
+    @abi.encode([@abi.VUint(256, max)]),
+    h("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+  )
+}
+
+test "encode: uint128(0x1234)" {
+  assert_eq(
+    @abi.encode([@abi.VUint(128, b"\x12\x34")]),
+    h("0x0000000000000000000000000000000000000000000000000000000000001234"),
+  )
+}
+
+test "encode: bool(true)" {
+  assert_eq(
+    @abi.encode([@abi.VBool(true)]),
+    h("0x0000000000000000000000000000000000000000000000000000000000000001"),
+  )
+}
+
+test "encode: bool(false)" {
+  assert_eq(
+    @abi.encode([@abi.VBool(false)]),
+    h("0x0000000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: address" {
+  assert_eq(
+    @abi.encode([addr("0x52908400098527886E0F7030069857D2E4169EE7")]),
+    h("0x00000000000000000000000052908400098527886e0f7030069857d2e4169ee7"),
+  )
+}
+
+test "encode: bytes32" {
+  assert_eq(
+    @abi.encode([
+      @abi.VFixedBytes(32, h("0xdeadbeef00000000000000000000000000000000000000000000000000000000")),
+    ]),
+    h("0xdeadbeef00000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: bytes4(0x12345678)" {
+  assert_eq(
+    @abi.encode([@abi.VFixedBytes(4, b"\x12\x34\x56\x78")]),
+    h("0x1234567800000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: bytes1(0xab)" {
+  assert_eq(
+    @abi.encode([@abi.VFixedBytes(1, b"\xab")]),
+    h("0xab00000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+// ---- encode dynamic ----
+
+test "encode: bytes(empty)" {
+  assert_eq(
+    @abi.encode([@abi.VBytes(b"")]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: bytes(0x010203)" {
+  assert_eq(
+    @abi.encode([@abi.VBytes(b"\x01\x02\x03")]),
+    h("0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000030102030000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: bytes(35 bytes)" {
+  let payload = Bytes::make(35, b'\xab')
+  assert_eq(
+    @abi.encode([@abi.VBytes(payload)]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000023ababababababababababababababababababababababababababababababababababab0000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: string(empty)" {
+  assert_eq(
+    @abi.encode([@abi.VString("")]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: string(hello)" {
+  assert_eq(
+    @abi.encode([@abi.VString("hello")]),
+    h("0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: string(64 'a' chars)" {
+  let s = String::make(64, 'a')
+  assert_eq(
+    @abi.encode([@abi.VString(s)]),
+    h("0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004061616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161"),
+  )
+}
+
+// ---- mixed tuples ----
+
+test "encode: (uint256, uint256) = (1, 2)" {
+  assert_eq(
+    @abi.encode([u(1UL), u(2UL)]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002"),
+  )
+}
+
+test "encode: (uint256, string) = (1, hello)" {
+  assert_eq(
+    @abi.encode([u(1UL), @abi.VString("hello")]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: (string, uint256) = (hello, 1) — offset comes first" {
+  assert_eq(
+    @abi.encode([@abi.VString("hello"), u(1UL)]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: (string, string) = (a, b)" {
+  assert_eq(
+    @abi.encode([@abi.VString("a"), @abi.VString("b")]),
+    h("0x000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000016200000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: (address, uint256, bytes)" {
+  assert_eq(
+    @abi.encode([
+      addr("0x52908400098527886E0F7030069857D2E4169EE7"),
+      u(1000UL),
+      @abi.VBytes(b"\xde\xad"),
+    ]),
+    h("0x00000000000000000000000052908400098527886e0f7030069857d2e4169ee700000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000002dead000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+// ---- dynamic arrays ----
+
+test "encode: uint256[] = [1, 2, 3]" {
+  assert_eq(
+    @abi.encode([@abi.VArray(@abi.TUint(256), [u(1UL), u(2UL), u(3UL)])]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"),
+  )
+}
+
+test "encode: uint256[] = [] (empty)" {
+  assert_eq(
+    @abi.encode([@abi.VArray(@abi.TUint(256), [])]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: string[] = [a, bb]" {
+  assert_eq(
+    @abi.encode([
+      @abi.VArray(@abi.TString, [@abi.VString("a"), @abi.VString("bb")]),
+    ]),
+    h("0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000026262000000000000000000000000000000000000000000000000000000000000"),
+  )
+}
+
+test "encode: address[] (one element)" {
+  assert_eq(
+    @abi.encode([
+      @abi.VArray(@abi.TAddress, [
+        addr("0x52908400098527886E0F7030069857D2E4169EE7"),
+      ]),
+    ]),
+    h("0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000052908400098527886e0f7030069857d2e4169ee7"),
+  )
+}
+
+// ---- function call encoding ----
+
+test "encode_function_call: ERC20 transfer" {
+  let call = @abi.encode_function_call("transfer(address,uint256)", [
+    addr("0x52908400098527886E0F7030069857D2E4169EE7"),
+    u(1000000000000000000UL), // 1 ETH in wei
+  ])
+  assert_eq(
+    call,
+    h("0xa9059cbb00000000000000000000000052908400098527886e0f7030069857d2e4169ee70000000000000000000000000000000000000000000000000de0b6b3a7640000"),
+  )
+}
+
+test "encode_function_call: ERC20 balanceOf" {
+  let call = @abi.encode_function_call("balanceOf(address)", [
+    addr("0x52908400098527886E0F7030069857D2E4169EE7"),
+  ])
+  assert_eq(
+    call,
+    h("0x70a0823100000000000000000000000052908400098527886e0f7030069857d2e4169ee7"),
+  )
+}
+
+// ---- decode ----
+
+test "decode: uint256(0x42)" {
+  let data = h("0x0000000000000000000000000000000000000000000000000000000000000042")
+  match @abi.decode([@abi.TUint(256)], data) {
+    Ok(values) => {
+      assert_eq(values.length(), 1)
+      assert_eq(values[0], @abi.VUint(256, b"\x42"))
+    }
+    Err(e) => abort("decode failed: " + e.to_string())
+  }
+}
+
+test "decode: bool(true)" {
+  let data = h("0x0000000000000000000000000000000000000000000000000000000000000001")
+  match @abi.decode([@abi.TBool], data) {
+    Ok(values) => assert_eq(values[0], @abi.VBool(true))
+    Err(_) => abort("decode failed")
+  }
+}
+
+test "decode: address" {
+  let data = h("0x00000000000000000000000052908400098527886e0f7030069857d2e4169ee7")
+  match @abi.decode([@abi.TAddress], data) {
+    Ok(values) =>
+      assert_eq(
+        values[0],
+        @abi.VAddress(h("0x52908400098527886E0F7030069857D2E4169EE7")),
+      )
+    Err(_) => abort("decode failed")
+  }
+}
+
+test "decode: bytes(0x010203)" {
+  let data = h("0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000030102030000000000000000000000000000000000000000000000000000000000")
+  match @abi.decode([@abi.TBytes], data) {
+    Ok(values) => assert_eq(values[0], @abi.VBytes(b"\x01\x02\x03"))
+    Err(_) => abort("decode failed")
+  }
+}
+
+test "decode: string(hello)" {
+  let data = h("0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000")
+  match @abi.decode([@abi.TString], data) {
+    Ok(values) => assert_eq(values[0], @abi.VString("hello"))
+    Err(_) => abort("decode failed")
+  }
+}
+
+test "decode: (uint256, string) = (1, hello)" {
+  let data = h("0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000")
+  match @abi.decode([@abi.TUint(256), @abi.TString], data) {
+    Ok(values) => {
+      assert_eq(values[0], @abi.VUint(256, b"\x01"))
+      assert_eq(values[1], @abi.VString("hello"))
+    }
+    Err(_) => abort("decode failed")
+  }
+}
+
+test "decode: uint256[] = [1, 2, 3]" {
+  let data = h("0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003")
+  match @abi.decode([@abi.TArray(@abi.TUint(256))], data) {
+    Ok(values) =>
+      assert_eq(
+        values[0],
+        @abi.VArray(@abi.TUint(256), [
+          @abi.VUint(256, b"\x01"),
+          @abi.VUint(256, b"\x02"),
+          @abi.VUint(256, b"\x03"),
+        ]),
+      )
+    Err(_) => abort("decode failed")
+  }
+}
+
+// ---- decode error cases ----
+
+test "decode: invalid bool byte" {
+  let data = h("0x0000000000000000000000000000000000000000000000000000000000000002")
+  assert_true(@abi.decode([@abi.TBool], data) is Err(InvalidBool(_)))
+}
+
+test "decode: address with non-zero pad" {
+  let data = h("0x010000000000000000000052908400098527886e0f7030069857d2e4169ee7ff")
+  assert_true(@abi.decode([@abi.TAddress], data) is Err(NonZeroAddressPad))
+}
+
+test "decode: truncated input" {
+  let data = h("0x00000000000000000000000000000000000000000000000000")
+  assert_true(@abi.decode([@abi.TUint(256)], data) is Err(Truncated(_)))
+}
+
+// ---- round-trip ----
+
+test "round-trip: complex (address, uint256, string, bytes)" {
+  let original : Array[@abi.AbiValue] = [
+    addr("0x52908400098527886E0F7030069857D2E4169EE7"),
+    u(0xdeadbeefUL),
+    @abi.VString("hello world"),
+    @abi.VBytes(b"\x01\x02\x03\x04\x05"),
+  ]
+  let encoded = @abi.encode(original)
+  match @abi.decode(
+    [@abi.TAddress, @abi.TUint(256), @abi.TString, @abi.TBytes],
+    encoded,
+  ) {
+    Ok(decoded) => {
+      assert_eq(decoded.length(), 4)
+      assert_eq(decoded[0], original[0])
+      assert_eq(decoded[1], original[1])
+      assert_eq(decoded[2], original[2])
+      assert_eq(decoded[3], original[3])
+    }
+    Err(e) => abort("decode failed: " + e.to_string())
+  }
+}
