@@ -1,0 +1,7 @@
+import {
+  "skmtkytr/ethbit/sha512" @sha512,
+}
+
+import {
+  "skmtkytr/ethbit/hex" @hex,
+} for "test"
