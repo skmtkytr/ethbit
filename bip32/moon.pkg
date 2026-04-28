@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/bigint" @bigint,
+  "skmtkytr/ethbit/base58" @base58,
   "skmtkytr/ethbit/bytesx" @bytesx,
   "skmtkytr/ethbit/ripemd160" @ripemd160,
   "skmtkytr/ethbit/secp256k1" @secp256k1,
