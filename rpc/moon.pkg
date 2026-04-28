@@ -6,4 +6,5 @@ import {
   "moonbitlang/core/bigint" @bigint,
   "moonbitlang/core/json" @json,
   "skmtkytr/ethbit/hex" @hex,
+  "skmtkytr/ethbit/tx" @tx,
 }
