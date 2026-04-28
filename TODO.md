@@ -21,7 +21,7 @@
 - erigon 固有 namespace（`erigon_getHeaderByNumber`, `erigon_blockNumber`, `erigon_forks`, `erigon_getBlockByTimestamp`, etc.）
 - engine_API（コンセンサスクライアント連携。通常 wallet 不要だが完全性のため）
 - admin_API / personal_API（後者はセキュリティ的に非推奨。実装するか判断）
-- 型付きレスポンスデコーダ：`Block`, `TransactionReceipt`, `Log`, `FeeHistoryResult`, `AccessListResult`, `TraceResult` 等を MoonBit struct に
+- `TraceResult` / debug_* 系の型付きデコーダ（その他の標準レスポンス：`Block`, `TransactionReceipt`, `TransactionInfo`, `Log`, `Withdrawal`, `FeeHistoryResult`, `SyncingStatus`, `AccessListResult` は実装済）
 - `eth_subscribe` 用の subscription manager（id ↔ callback 管理）
 
 ### secp256k1
