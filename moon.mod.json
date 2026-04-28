@@ -1,7 +1,7 @@
 {
   "name": "skmtkytr/ethbit",
   "version": "0.0.1",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "keywords": ["ethereum", "wallet", "rpc", "evm", "abi", "rlp"],
   "description": "Multi-platform Ethereum wallet toolkit in MoonBit. Targets wasm-gc / native / js from a single source."
 }

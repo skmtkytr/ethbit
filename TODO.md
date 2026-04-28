@@ -92,8 +92,6 @@
 
 ## ドキュメント
 
-- LICENSE ファイル（`moon.mod.json` で Apache-2.0 宣言済だが root に LICENSE が無い）
-- top-level README（パッケージ一覧、使用例、`tools/viem-vectors/` の運用、SECURITY position の要約）
 - `cttest/REPORT.md` を参照する SECURITY 系の集約
 
 ## 検討事項

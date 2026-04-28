@@ -143,4 +143,4 @@ the repo (instructions can be regenerated; see commit history if needed).
 
 ## License
 
-Apache-2.0. The full text is not yet checked in — that is on the TODO list.
+MIT. See [`LICENSE`](LICENSE).
