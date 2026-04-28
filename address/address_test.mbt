@@ -163,3 +163,29 @@ test "round-trip: checksum of decoded checksum equals original" {
   let bytes = b(original)
   assert_eq(unwrap(@address.to_checksum(bytes)), original)
 }
+
+// ---- from_pubkey_xy ----
+
+fn unwrap_addr(r : Result[Bytes, @address.AddressError]) -> Bytes {
+  match r {
+    Ok(a) => a
+    Err(_) => abort("expected Ok in test")
+  }
+}
+
+test "from_pubkey_xy: priv=1 (pub=G) → 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf" {
+  // SEC1 uncompressed body of G (no 0x04 prefix): Gx || Gy
+  let g_xy = b(
+    "0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8",
+  )
+  let addr = unwrap_addr(@address.from_pubkey_xy(g_xy))
+  let want = b("0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf")
+  assert_eq(addr, want)
+}
+
+test "from_pubkey_xy: rejects wrong-length input" {
+  match @address.from_pubkey_xy(b"\x00\x01") {
+    Ok(_) => assert_true(false)
+    Err(_) => ()
+  }
+}

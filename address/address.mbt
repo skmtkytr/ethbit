@@ -92,3 +92,19 @@ fn nibble_to_lower_hex_byte(n : Int) -> Byte {
     (n + 0x57).to_byte() // 'a'..'f'
   }
 }
+
+///|
+/// Derive a 20-byte Ethereum address from the 64-byte SEC1 uncompressed body
+/// of a public key (i.e. x || y, no 0x04 prefix). Address is the last 20
+/// bytes of keccak256(x || y).
+pub fn from_pubkey_xy(xy : Bytes) -> Result[Bytes, AddressError] {
+  if xy.length() != 64 {
+    return Err(InvalidLength(xy.length()))
+  }
+  let hash = @keccak.keccak256(xy)
+  let out : Array[Byte] = Array::make(20, b'\x00')
+  for i = 0; i < 20; i = i + 1 {
+    out[i] = hash[12 + i]
+  }
+  Ok(Bytes::from_array(out[:]))
+}
