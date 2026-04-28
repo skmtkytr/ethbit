@@ -5,9 +5,7 @@
 ## 既存パッケージの未完成箇所
 
 ### bip32
-- xprv / xpub シリアライズ（base58check 必須 → base58 + double-SHA-256 チェックサム）
-- 公開鍵側の派生 CKDpub（watch-only ウォレット用）
-- 派生 path の hardened-only 制約検証ヘルパ
+- 派生 path の hardened-only 制約検証ヘルパ（priv-only path / pub-only path の事前判定）
 
 ### bip39
 - 2048 語の English wordlist 同梱
@@ -23,7 +21,7 @@
 
 ### rpc
 - HTTP transport（target 別実装が必要：JS は fetch、native はソケット直叩きまたは外部 lib、wasm-gc は host 関数）
-- WebSocket transport（`eth_subscribe` / `eth_unsubscribe` 用）
+- WebSocket transport（フレーム送受信。プロトコル層の `eth_subscribe` / `eth_unsubscribe` / `parse_notification` は実装済）
 - erigon 固有 namespace（`erigon_getHeaderByNumber`, `erigon_blockNumber`, `erigon_forks`, `erigon_getBlockByTimestamp`, etc.）
 - engine_API（コンセンサスクライアント連携。通常 wallet 不要だが完全性のため）
 - admin_API / personal_API（後者はセキュリティ的に非推奨。実装するか判断）
