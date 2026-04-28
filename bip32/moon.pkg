@@ -1,0 +1,12 @@
+import {
+  "moonbitlang/core/bigint" @bigint,
+  "skmtkytr/ethbit/bytesx" @bytesx,
+  "skmtkytr/ethbit/ripemd160" @ripemd160,
+  "skmtkytr/ethbit/secp256k1" @secp256k1,
+  "skmtkytr/ethbit/sha256" @sha256,
+  "skmtkytr/ethbit/sha512" @sha512,
+}
+
+import {
+  "skmtkytr/ethbit/hex" @hex,
+} for "test"
