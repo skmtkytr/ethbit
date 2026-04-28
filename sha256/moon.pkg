@@ -1,0 +1,3 @@
+import {
+  "skmtkytr/ethbit/hex" @hex,
+} for "test"
