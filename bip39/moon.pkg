@@ -1,4 +1,5 @@
 import {
+  "skmtkytr/ethbit/sha256" @sha256,
   "skmtkytr/ethbit/sha512" @sha512,
 }
 
