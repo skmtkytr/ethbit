@@ -43,6 +43,21 @@ pub(all) struct Tx1559 {
   access_list : Array[AccessListEntry]
 }
 
+///|
+pub(all) struct Tx4844 {
+  chain_id : Bytes
+  nonce : Bytes
+  max_priority_fee_per_gas : Bytes
+  max_fee_per_gas : Bytes
+  gas_limit : Bytes
+  to : Bytes // exactly 20 bytes; not validated here
+  value : Bytes
+  data : Bytes
+  access_list : Array[AccessListEntry]
+  max_fee_per_blob_gas : Bytes
+  blob_versioned_hashes : Array[Bytes]
+}
+
 // ---------- legacy (with EIP-155) ----------
 
 ///|
@@ -161,4 +176,74 @@ pub fn hash_unsigned_1559(tx : Tx1559) -> Bytes {
 ///|
 pub fn hash_signed_1559(tx : Tx1559, sig : Signature) -> Bytes {
   @keccak.keccak256(encode_signed_1559(tx, sig))
+}
+
+// ---------- EIP-4844 (type 3, blob) ----------
+
+///|
+fn encode_blob_versioned_hashes(hashes : Array[Bytes]) -> @rlp.RlpValue {
+  let items : Array[@rlp.RlpValue] = Array::make(hashes.length(), @rlp.RlpString(b""))
+  for i = 0; i < hashes.length(); i = i + 1 {
+    items[i] = @rlp.RlpString(hashes[i])
+  }
+  @rlp.RlpList(items)
+}
+
+///|
+/// EIP-4844 unsigned encoding: 0x03 || rlp([chainId, nonce, maxPriorityFeePerGas,
+///   maxFeePerGas, gasLimit, to, value, data, accessList, maxFeePerBlobGas,
+///   blobVersionedHashes]).
+pub fn encode_unsigned_4844(tx : Tx4844) -> Bytes {
+  let body = @rlp.encode(
+    @rlp.RlpList([
+      @rlp.RlpString(tx.chain_id),
+      @rlp.RlpString(tx.nonce),
+      @rlp.RlpString(tx.max_priority_fee_per_gas),
+      @rlp.RlpString(tx.max_fee_per_gas),
+      @rlp.RlpString(tx.gas_limit),
+      @rlp.RlpString(tx.to),
+      @rlp.RlpString(tx.value),
+      @rlp.RlpString(tx.data),
+      encode_access_list(tx.access_list),
+      @rlp.RlpString(tx.max_fee_per_blob_gas),
+      encode_blob_versioned_hashes(tx.blob_versioned_hashes),
+    ]),
+  )
+  @bytesx.concat([b"\x03", body])
+}
+
+///|
+/// EIP-4844 signed encoding: 0x03 || rlp([chainId, nonce, maxPriorityFeePerGas,
+///   maxFeePerGas, gasLimit, to, value, data, accessList, maxFeePerBlobGas,
+///   blobVersionedHashes, yParity, r, s]).
+pub fn encode_signed_4844(tx : Tx4844, sig : Signature) -> Bytes {
+  let body = @rlp.encode(
+    @rlp.RlpList([
+      @rlp.RlpString(tx.chain_id),
+      @rlp.RlpString(tx.nonce),
+      @rlp.RlpString(tx.max_priority_fee_per_gas),
+      @rlp.RlpString(tx.max_fee_per_gas),
+      @rlp.RlpString(tx.gas_limit),
+      @rlp.RlpString(tx.to),
+      @rlp.RlpString(tx.value),
+      @rlp.RlpString(tx.data),
+      encode_access_list(tx.access_list),
+      @rlp.RlpString(tx.max_fee_per_blob_gas),
+      encode_blob_versioned_hashes(tx.blob_versioned_hashes),
+      @rlp.RlpString(sig.v),
+      @rlp.RlpString(sig.r),
+      @rlp.RlpString(sig.s),
+    ]),
+  )
+  @bytesx.concat([b"\x03", body])
+}
+
+///|
+pub fn hash_unsigned_4844(tx : Tx4844) -> Bytes {
+  @keccak.keccak256(encode_unsigned_4844(tx))
+}
+
+///|
+pub fn hash_signed_4844(tx : Tx4844, sig : Signature) -> Bytes {
+  @keccak.keccak256(encode_signed_4844(tx, sig))
 }
