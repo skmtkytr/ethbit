@@ -187,7 +187,7 @@ fn decode_at(
   let prefix = bytes[offset].to_int()
   if prefix < 0x80 {
     // single byte string
-    Ok((RlpString(slice(bytes, offset, offset + 1)), offset + 1))
+    Ok((RlpString(@bytesx.slice(bytes, offset, offset + 1)), offset + 1))
   } else if prefix < 0xb8 {
     // short string, payload length 0..55
     let len = prefix - 0x80
@@ -199,7 +199,7 @@ fn decode_at(
     if len == 1 && bytes[start].to_int() < 0x80 {
       return Err(NonCanonicalSingleByte)
     }
-    Ok((RlpString(slice(bytes, start, end)), end))
+    Ok((RlpString(@bytesx.slice(bytes, start, end)), end))
   } else if prefix < 0xc0 {
     // long string, payload length is itself encoded in (prefix - 0xb7) bytes
     let len_of_len = prefix - 0xb7
@@ -219,7 +219,7 @@ fn decode_at(
     if end > bytes.length() {
       return Err(TruncatedInput(end, bytes.length()))
     }
-    Ok((RlpString(slice(bytes, len_end, end)), end))
+    Ok((RlpString(@bytesx.slice(bytes, len_end, end)), end))
   } else if prefix < 0xf8 {
     // short list, payload length 0..55
     let payload_len = prefix - 0xc0
@@ -293,12 +293,3 @@ fn decode_length_be(bytes : Bytes, offset : Int, len : Int) -> Int {
   result
 }
 
-///|
-fn slice(bytes : Bytes, start : Int, end : Int) -> Bytes {
-  let n = end - start
-  let arr : Array[Byte] = Array::make(n, b'\x00')
-  for i = 0; i < n; i = i + 1 {
-    arr[i] = bytes[start + i]
-  }
-  Bytes::from_array(arr[:])
-}
