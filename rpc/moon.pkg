@@ -1,0 +1,9 @@
+// Suppress warning 0035 (reserved_keyword) — JSON-RPC requires the field name
+// `method`, which is a reserved word in MoonBit.
+warnings = "-35"
+
+import {
+  "moonbitlang/core/bigint" @bigint,
+  "moonbitlang/core/json" @json,
+  "skmtkytr/ethbit/hex" @hex,
+}
