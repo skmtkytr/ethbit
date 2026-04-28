@@ -8,20 +8,16 @@
 - 派生 path の hardened-only 制約検証ヘルパ（priv-only path / pub-only path の事前判定）
 
 ### bip39
-- 2048 語の English wordlist 同梱
-- `entropy_to_mnemonic` / `mnemonic_to_entropy`（チェックサムビット計算込）
-- 他言語 wordlist（必要になれば）
+- 他言語 wordlist（Japanese / Chinese / Korean / Spanish 等。必要になれば）
 - Unicode 入力時の NFKD 正規化（現状は呼び出し側責任。`String` レベルで対応するならパッケージ追加）
 
 ### msg（EIP-712）
-- typeString パーサ（`"Mail(Person from,Person to,string contents)"` を分解）
-- 値ツリー（nested struct / array / 各 primitive）からの structHash 構築
-- `EIP712Domain` 構造体 + ドメインセパレータ計算ヘルパ
-- viem の `signTypedData` / `verifyTypedData` 出力との byte-equivalence テスト
+- 固定サイズ配列 `T[K]` 対応（現状は dynamic `T[]` のみ）
+- viem の `signTypedData` / `verifyTypedData` 出力との byte-equivalence テスト（最終ハッシュは spec 例で一致確認済み、追加ベクトルが欲しい）
 
 ### rpc
 - HTTP transport（target 別実装が必要：JS は fetch、native はソケット直叩きまたは外部 lib、wasm-gc は host 関数）
-- WebSocket transport（フレーム送受信。プロトコル層の `eth_subscribe` / `eth_unsubscribe` / `parse_notification` は実装済）
+- WebSocket transport：フレーム / handshake のプロトコル層は `ws` パッケージに実装済。残るは TCP + TLS の per-target 接続層
 - erigon 固有 namespace（`erigon_getHeaderByNumber`, `erigon_blockNumber`, `erigon_forks`, `erigon_getBlockByTimestamp`, etc.）
 - engine_API（コンセンサスクライアント連携。通常 wallet 不要だが完全性のため）
 - admin_API / personal_API（後者はセキュリティ的に非推奨。実装するか判断）
@@ -69,6 +65,8 @@
 ## ハッシュ系ユーティリティ
 
 - `hash160(bytes) = ripemd160(sha256(bytes))` を独立ヘルパとして公開（現状 bip32 内部）
+- SHA-1 を独立パッケージに切り出すか（現状 ws の private、handshake 専用）
+- Base64 を独立パッケージに切り出すか（現状 ws の private）
 - BLAKE2b（KDF や Ethereum L2 で使われる箇所がある）
 - SHA-3-256 / SHA-3-512（Keccak とは別物。NIST 標準。需要次第）
 
