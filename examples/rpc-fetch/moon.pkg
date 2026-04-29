@@ -15,7 +15,7 @@ options(
   },
   link: {
     "native": {
-      "cc-link-flags": "-lcurl",
+      "stub-cc-link-flags": "-lcurl",
     },
   },
 )

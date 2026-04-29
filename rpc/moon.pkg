@@ -18,7 +18,7 @@ options(
   "native-stub": [ "fetch_native.c" ],
   "link": {
     "native": {
-      "cc-link-flags": "-lcurl",
+      "stub-cc-link-flags": "-lcurl",
     },
   },
 )

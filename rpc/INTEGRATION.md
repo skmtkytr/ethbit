@@ -201,11 +201,16 @@ options(
   "is-main": true,
   link: {
     "native": {
-      "cc-link-flags": "-lcurl",
+      "stub-cc-link-flags": "-lcurl",
     },
   },
 )
 ```
+
+`stub-cc-link-flags` (rather than the more obvious `cc-link-flags`) keeps
+moon's `tcc -run` fast-path enabled. With `cc-link-flags` moon falls back
+to the system `cc` to produce a real `.exe`, which still works but is
+slightly slower to build.
 
 ## What's NOT here
 
