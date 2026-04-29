@@ -1,6 +1,6 @@
 // Suppress 0035 (reserved_keyword) for the JSON-RPC `method` field.
-// Suppress 0029 (unused_package) — @rpc is unused on non-JS targets where
-// only main_stub.mbt is built.
+// Suppress 0029 (unused_package) — @rpc is unused on the wasm/wasm-gc
+// stub paths where fetch_request isn't available.
 warnings = "-35-29"
 
 import {
@@ -10,7 +10,12 @@ import {
 options(
   "is-main": true,
   targets: {
-    "main.mbt": [ "js" ],
-    "main_stub.mbt": [ "wasm", "wasm-gc", "native", "llvm" ],
+    "main.mbt": [ "js", "native" ],
+    "main_stub.mbt": [ "wasm", "wasm-gc", "llvm" ],
+  },
+  link: {
+    "native": {
+      "cc-link-flags": "-lcurl",
+    },
   },
 )

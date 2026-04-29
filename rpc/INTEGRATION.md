@@ -149,36 +149,63 @@ endpoint goes away or you want to validate against a different chain:
 The fixtures are pinned values, so changes in chain state do not invalidate
 the tests.
 
-## JS-target fetch transport
+## Built-in fetch transport (js + native)
 
-A built-in fetch wrapper is available on the `js` backend only:
+A `fetch_post` / `fetch_request` pair is exposed on both backends with
+the same callback API:
 
 ```moonbit
 @rpc.fetch_post(url, body, on_ok, on_err)        // raw POST
 @rpc.fetch_request(url, request, on_ok, on_err)  // encode + POST + decode
 ```
 
-Both are callback-based: the MoonBit caller returns immediately and the
-callbacks fire when the underlying Promise settles. Requires a host with
-a `fetch` global (browser native, Node 18+, Bun, Deno).
+| target | implementation | requirements |
+|---|---|---|
+| `js` | host `fetch` global via `extern "js"` | Node 18+ / Bun / Deno / browser |
+| `native` | libcurl via `extern "c"` + native-stub | libcurl headers + `-lcurl` link |
+
+Semantics:
+- The js variant is non-blocking from the JS event loop's perspective —
+  callbacks fire when the Promise settles.
+- The native variant blocks during `curl_easy_perform` and invokes the
+  callback inline before returning.
+
+The wasm and wasm-gc backends do not have a built-in transport. Bring
+your own (host imports / WASI).
 
 Working example: [`examples/rpc-fetch`](../examples/rpc-fetch/main.mbt).
-Run it with:
+Run it on either target:
 
 ```fish
-moon run --target js examples/rpc-fetch
+moon run --target js     examples/rpc-fetch
+moon run --target native examples/rpc-fetch
 ```
 
-Output (live against Sepolia):
+Output (live against Sepolia, identical on both):
 ```
 eth_chainId           = 11155111
-eth_blockNumber       = 10750431
-balance(vitalik) wei  = 57227314527865035068
+eth_blockNumber       = 10753729
+balance(vitalik) wei  = 57229714527866035076
 ```
 
-For native or wasm-gc targets the transport is not implemented; you must
-provide your own (libcurl FFI on native, host imports on wasm-gc — see
-[`TODO.md`](../TODO.md)).
+### Linker flags for native
+
+A package that uses `@rpc.fetch_*` on native must add `-lcurl` to its own
+link flags so the libcurl symbols resolve at the final binary's link step.
+The `rpc` package already does this for itself, but downstream consumers
+must opt in:
+
+```
+// in your application's moon.pkg
+options(
+  "is-main": true,
+  link: {
+    "native": {
+      "cc-link-flags": "-lcurl",
+    },
+  },
+)
+```
 
 ## What's NOT here
 

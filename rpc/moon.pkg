@@ -4,6 +4,7 @@ warnings = "-35"
 
 import {
   "moonbitlang/core/bigint" @bigint,
+  "moonbitlang/core/encoding/utf8" @utf8,
   "moonbitlang/core/json" @json,
   "skmtkytr/ethbit/hex" @hex,
   "skmtkytr/ethbit/tx" @tx,
@@ -12,5 +13,12 @@ import {
 options(
   targets: {
     "fetch_js.mbt": [ "js" ],
+    "fetch_native.mbt": [ "native" ],
+  },
+  "native-stub": [ "fetch_native.c" ],
+  "link": {
+    "native": {
+      "cc-link-flags": "-lcurl",
+    },
   },
 )
